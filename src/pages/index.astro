@@ -39,6 +39,7 @@ import Layout from '../layouts/Layout.astro';
 				<canvas id="enCanvas" width="1080" height="1350"></canvas>
 				<button class="dl" data-side="en">Download English</button>
 			</article>
+			<button class="dl-both" id="dlBoth">Download Both · இரண்டும்</button>
 		</section>
 
 		<section class="caption" id="captionBox" hidden>
@@ -197,6 +198,22 @@ import Layout from '../layouts/Layout.astro';
 			background: var(--gold-deep);
 			color: var(--cream);
 		}
+		.dl-both {
+			grid-column: 1 / -1;
+			justify-self: center;
+			min-width: 280px;
+			padding: 14px 36px;
+			font: 700 16px 'Noto Serif Tamil', 'Noto Serif', serif;
+			border: 0;
+			border-radius: 12px;
+			background: var(--gold-deep);
+			color: var(--cream);
+			cursor: pointer;
+			box-shadow: 0 8px 24px rgba(138, 109, 59, 0.35);
+		}
+		.dl-both:hover {
+			background: #7a5f2e;
+		}
 		.caption {
 			max-width: 760px;
 			margin: 56px auto 0;
@@ -328,6 +345,13 @@ import Layout from '../layouts/Layout.astro';
 				const canvas = side === 'ta' ? taCanvas : enCanvas;
 				downloadCanvas(canvas, `kural-${current.number}-${side}.png`);
 			});
+		});
+
+		document.getElementById('dlBoth').addEventListener('click', () => {
+			if (!current) return;
+			const n = current.number;
+			downloadCanvas(taCanvas, `kural-${n}-ta.png`);
+			setTimeout(() => downloadCanvas(enCanvas, `kural-${n}-en.png`), 350);
 		});
 
 		copyBtn.addEventListener('click', async () => {
