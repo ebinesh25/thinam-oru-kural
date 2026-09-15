@@ -1,11 +1,346 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
 <Layout>
-	<Welcome />
+	<main>
+		<header class="hero">
+			<div class="brand">
+				<span class="mark">✦</span>
+				<h1>தினம் ஒரு குறள்</h1>
+				<p class="en">THINAM ORU KURAL</p>
+			</div>
+			<p class="tagline">ஒவ்வொரு நாளும் ஒரு திருக்குறள் — Instagram பதிவுக்குத் தயார்.</p>
+		</header>
+
+		<form id="genForm" class="gen">
+			<label for="kuralNum">குறள் எண் / Kural number</label>
+			<div class="row">
+				<input
+					id="kuralNum"
+					type="number"
+					min="1"
+					max="1330"
+					value="141"
+					inputmode="numeric"
+					autocomplete="off"
+				/>
+				<button id="genBtn" type="submit">உருவாக்கு · Generate</button>
+			</div>
+			<p id="status" class="status" role="status"></p>
+		</form>
+
+		<section class="posters" id="posters" hidden>
+			<article class="card">
+				<canvas id="taCanvas" width="1080" height="1350"></canvas>
+				<button class="dl" data-side="ta">Download Tamil · தமிழ்</button>
+			</article>
+			<article class="card">
+				<canvas id="enCanvas" width="1080" height="1350"></canvas>
+				<button class="dl" data-side="en">Download English</button>
+			</article>
+		</section>
+
+		<section class="caption" id="captionBox" hidden>
+			<div class="cap-head">
+				<h2>Instagram Caption</h2>
+				<button id="copyBtn">Copy</button>
+			</div>
+			<pre id="caption"></pre>
+		</section>
+
+		<footer class="site-foot">
+			<p>Powered by <a href="https://kural.codewithram.dev" target="_blank" rel="noopener">kural.codewithram.dev</a> · Generated 100% in your browser</p>
+		</footer>
+	</main>
+
+	<style>
+		:root {
+			--paper: #f7efdd;
+			--paper2: #efe3c9;
+			--ink: #3d2c17;
+			--ink-soft: #6d5636;
+			--gold: #a97f3f;
+			--gold-deep: #8a6d3b;
+			--cream: #fdf8ee;
+		}
+		* {
+			box-sizing: border-box;
+		}
+		body {
+			margin: 0;
+			background:
+				radial-gradient(1200px 600px at 50% -10%, #fdf6e3 0%, #f3e7cd 55%, #e7d7b6 100%);
+			color: var(--ink);
+			font-family: 'Noto Serif Tamil', 'Noto Serif', Georgia, serif;
+			min-height: 100vh;
+		}
+		main {
+			max-width: 1120px;
+			margin: 0 auto;
+			padding: 48px 20px 64px;
+		}
+		.hero {
+			text-align: center;
+			margin-bottom: 36px;
+		}
+		.brand .mark {
+			display: inline-block;
+			color: var(--gold);
+			font-size: 26px;
+			margin-bottom: 4px;
+		}
+		.brand h1 {
+			margin: 0;
+			font-size: 42px;
+			font-weight: 700;
+			letter-spacing: 0.02em;
+		}
+		.brand .en {
+			margin: 2px 0 0;
+			font-family: 'Noto Serif', Georgia, serif;
+			font-size: 14px;
+			letter-spacing: 0.55em;
+			color: var(--gold-deep);
+			text-transform: uppercase;
+		}
+		.tagline {
+			margin: 14px 0 0;
+			color: var(--ink-soft);
+		}
+		.gen {
+			max-width: 620px;
+			margin: 0 auto 40px;
+			background: rgba(253, 248, 236, 0.75);
+			border: 1px solid rgba(138, 109, 59, 0.4);
+			border-radius: 18px;
+			padding: 22px 24px;
+			box-shadow: 0 10px 30px rgba(110, 84, 44, 0.12);
+		}
+		.gen label {
+			display: block;
+			font-size: 14px;
+			color: var(--ink-soft);
+			margin-bottom: 8px;
+		}
+		.gen .row {
+			display: flex;
+			gap: 10px;
+		}
+		.gen input {
+			flex: 1;
+			font: 700 20px 'Noto Serif Tamil', 'Noto Serif', serif;
+			padding: 12px 14px;
+			border: 1.5px solid var(--gold);
+			border-radius: 10px;
+			background: var(--cream);
+			color: var(--ink);
+			min-width: 0;
+		}
+		.gen button {
+			font: 700 16px 'Noto Serif Tamil', 'Noto Serif', serif;
+			padding: 12px 22px;
+			border: 0;
+			border-radius: 10px;
+			background: var(--gold-deep);
+			color: var(--cream);
+			cursor: pointer;
+			white-space: nowrap;
+		}
+		.gen button:hover {
+			background: #7a5f2e;
+		}
+		.gen button:disabled {
+			opacity: 0.6;
+			cursor: wait;
+		}
+		.status {
+			min-height: 22px;
+			margin: 12px 0 0;
+			font-size: 14px;
+		}
+		.status.err {
+			color: #9c3d2a;
+		}
+		.status.ok {
+			color: #3f6b3a;
+		}
+		.posters {
+			display: grid;
+			grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+			gap: 28px;
+			justify-items: center;
+		}
+		.card {
+			width: 100%;
+			max-width: 360px;
+		}
+		.card canvas {
+			width: 100%;
+			height: auto;
+			display: block;
+			border-radius: 10px;
+			box-shadow: 0 14px 40px rgba(61, 44, 23, 0.35);
+		}
+		.dl {
+			width: 100%;
+			margin-top: 14px;
+			font: 700 15px 'Noto Serif Tamil', 'Noto Serif', serif;
+			padding: 13px;
+			border: 1.5px solid var(--gold-deep);
+			border-radius: 10px;
+			background: var(--cream);
+			color: var(--gold-deep);
+			cursor: pointer;
+		}
+		.dl:hover {
+			background: var(--gold-deep);
+			color: var(--cream);
+		}
+		.caption {
+			max-width: 760px;
+			margin: 56px auto 0;
+		}
+		.cap-head {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+			margin-bottom: 10px;
+		}
+		.cap-head h2 {
+			margin: 0;
+			font-size: 22px;
+		}
+		.cap-head button {
+			font: 700 14px 'Noto Serif Tamil', 'Noto Serif', serif;
+			padding: 8px 18px;
+			border: 1.5px solid var(--gold-deep);
+			border-radius: 8px;
+			background: var(--cream);
+			color: var(--gold-deep);
+			cursor: pointer;
+		}
+		.cap-head button:hover {
+			background: var(--gold-deep);
+			color: var(--cream);
+		}
+		.caption pre {
+			margin: 0;
+			padding: 20px 22px;
+			background: rgba(253, 248, 236, 0.85);
+			border: 1px solid rgba(138, 109, 59, 0.4);
+			border-radius: 12px;
+			font: 15px/1.7 'Noto Serif Tamil', 'Noto Serif', monospace;
+			white-space: pre-wrap;
+			word-break: break-word;
+			color: var(--ink);
+		}
+		.site-foot {
+			text-align: center;
+			margin-top: 56px;
+			color: var(--ink-soft);
+			font-size: 13px;
+		}
+		.site-foot a {
+			color: var(--gold-deep);
+		}
+		@media (max-width: 640px) {
+			.gen .row {
+				flex-direction: column;
+			}
+			.brand h1 {
+				font-size: 32px;
+			}
+		}
+	</style>
+
+	<script>
+		import {
+			renderTamil,
+			renderEnglish,
+			buildCaption,
+			fetchKural,
+			ensureFonts,
+			downloadCanvas,
+		} from '../scripts/poster.js';
+
+		const taCanvas = document.getElementById('taCanvas');
+		const enCanvas = document.getElementById('enCanvas');
+		const form = document.getElementById('genForm');
+		const input = document.getElementById('kuralNum');
+		const btn = document.getElementById('genBtn');
+		const status = document.getElementById('status');
+		const posters = document.getElementById('posters');
+		const captionBox = document.getElementById('captionBox');
+		const caption = document.getElementById('caption');
+		const copyBtn = document.getElementById('copyBtn');
+
+		let current = null;
+
+		function setStatus(msg, cls = '') {
+			status.textContent = msg;
+			status.className = 'status' + (cls ? ' ' + cls : '');
+		}
+
+		async function generate(n) {
+			btn.disabled = true;
+			setStatus('Loading kural ' + n + ' …');
+			try {
+				await ensureFonts();
+				const d = await fetchKural(n);
+				const taCtx = taCanvas.getContext('2d');
+				const enCtx = enCanvas.getContext('2d');
+				const [taM, enM] = await Promise.all([
+					renderTamil(taCtx, d),
+					renderEnglish(enCtx, d),
+				]);
+				console.debug('[thinam] ta metrics', JSON.stringify(taM));
+				console.debug('[thinam] en metrics', JSON.stringify(enM));
+				caption.textContent = buildCaption(d);
+				posters.hidden = false;
+				captionBox.hidden = false;
+				current = d;
+				setStatus(
+					'✅ குறள் ' + d.number + ' — ' + d.chapter.names.ta + ' · ' + d.chapter.names.en,
+					'ok'
+				);
+			} catch (e) {
+				setStatus('❌ ' + (e.message || String(e)), 'err');
+			} finally {
+				btn.disabled = false;
+			}
+		}
+
+		form.addEventListener('submit', (ev) => {
+			ev.preventDefault();
+			const n = parseInt(input.value, 10);
+			if (Number.isNaN(n)) {
+				setStatus('எண்ணை உள்ளிடவும் · enter a number 1–1330', 'err');
+				return;
+			}
+			generate(Math.max(1, Math.min(1330, n)));
+		});
+
+		document.querySelectorAll('.dl').forEach((b) => {
+			b.addEventListener('click', () => {
+				if (!current) return;
+				const side = b.dataset.side;
+				const canvas = side === 'ta' ? taCanvas : enCanvas;
+				downloadCanvas(canvas, `kural-${current.number}-${side}.png`);
+			});
+		});
+
+		copyBtn.addEventListener('click', async () => {
+			try {
+				await navigator.clipboard.writeText(caption.textContent);
+				copyBtn.textContent = 'Copied ✓';
+				setTimeout(() => (copyBtn.textContent = 'Copy'), 1800);
+			} catch {
+				caption.select?.();
+			}
+		});
+
+		// initial demo post
+		generate(141);
+	</script>
 </Layout>
