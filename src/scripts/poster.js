@@ -170,28 +170,17 @@ async function drawPortrait(ctx, cx, cy, h) {
 	const dw = img.width * scale;
 	const dh = img.height * scale;
 	ctx.save();
-	ctx.globalAlpha = 0.45;
+	ctx.globalAlpha = 0.3;
 	ctx.drawImage(img, cx - dw / 2, cy - dh / 2, dw, dh);
 	ctx.restore();
 }
 
 function drawHeader(ctx, { title, titleFont, sub, subWidth }) {
-	// top mark
-	ctx.save();
-	ctx.translate(W / 2, 66);
-	ctx.rotate(Math.PI / 4);
-	ctx.strokeStyle = C.gold;
-	ctx.lineWidth = 2.5;
-	ctx.strokeRect(-9, -9, 18, 18);
-	ctx.fillStyle = C.goldDeep;
-	ctx.fillRect(-3.5, -3.5, 7, 7);
-	ctx.restore();
-
 	ctx.fillStyle = C.ink;
 	ctx.textAlign = 'center';
 	ctx.textBaseline = 'middle';
 	ctx.font = `700 58px ${titleFont}`;
-	ctx.fillText(title, W / 2, 168);
+	ctx.fillText(title, W / 2, 96);
 
 	if (sub) {
 		try {
@@ -201,16 +190,16 @@ function drawHeader(ctx, { title, titleFont, sub, subWidth }) {
 		}
 		ctx.font = `400 20px ${LATIN}`;
 		ctx.fillStyle = C.goldDeep;
-		ctx.fillText(sub, W / 2, 214);
+		ctx.fillText(sub, W / 2, 142);
 		ctx.letterSpacing = '0px';
 	}
 
-	drawRule(ctx, W / 2, 252, 330);
+	drawRule(ctx, W / 2, 180, 330);
 }
 
 export async function renderTamil(ctx, d) {
 	drawBackground(ctx);
-	await drawPortrait(ctx, W / 2, 1180, 460);
+	await drawPortrait(ctx, 280, 1180, 460);
 	drawHeader(ctx, {
 		title: 'தினம் ஒரு குறள்',
 		titleFont: TAMIL,
@@ -223,14 +212,14 @@ export async function renderTamil(ctx, d) {
 	const chapW = ctx.measureText(chapter).width + 44;
 	const secW = ctx.measureText(`${d.section.names.ta} · ${chapter}`).width + 44;
 	if (chapW + secW + 24 <= W - 160) {
-		pill(ctx, d.section.names.ta, W / 2 - chapW / 2 - 12, 310);
-		pill(ctx, chapter, W / 2 + chapW / 2 + 12, 310, { outline: true, fg: C.goldDeep });
+		pill(ctx, d.section.names.ta, W / 2 - chapW / 2 - 12, 250);
+		pill(ctx, chapter, W / 2 + chapW / 2 + 12, 250, { outline: true, fg: C.goldDeep });
 	} else {
-		pill(ctx, chapter, W / 2, 310, { outline: true, fg: C.goldDeep });
+		pill(ctx, chapter, W / 2, 250, { outline: true, fg: C.goldDeep });
 	}
 
 	// kural number
-	pill(ctx, `குறள் ${d.number}`, W / 2, 380, { bg: C.goldDeep, size: 26 });
+	pill(ctx, `குறள் ${d.number}`, W / 2, 320, { bg: C.goldDeep, size: 26 });
 
 	// verse
 	const verseFont = { weight: 700, family: TAMIL };
@@ -270,7 +259,7 @@ export async function renderTamil(ctx, d) {
 	}
 	const uraibottom = uraiY + uBlock.height;
 
-	footer(ctx, 'தினம் ஒரு குறள் · Thinam Oru Kural', 1324);
+	footer(ctx, 'தினம் ஒரு குறள் · Thinam Oru Kural', 982, 1308);
 
 	return {
 		type: 'ta',
@@ -281,7 +270,7 @@ export async function renderTamil(ctx, d) {
 		portraitBottom: 1410,
 		portraitRingBottom: 1410,
 		gapUraiPortrait: uraibottom - 950,
-		footerY: 1324,
+		footerY: 1308,
 	};
 }
 
@@ -312,14 +301,14 @@ function fitBlock2(ctx, lines, maxW, maxH, startPx, minPx, font, lh) {
 
 export async function renderEnglish(ctx, d) {
 	drawBackground(ctx);
-	await drawPortrait(ctx, W / 2, 1180, 460);
+	await drawPortrait(ctx, 280, 1180, 460);
 	drawHeader(ctx, {
 		title: 'Thinam Oru Kural',
 		titleFont: LATIN,
 		sub: 'ONE KURAL · EVERY DAY',
 	});
 
-	pill(ctx, `Kural ${d.number}`, W / 2, 348, { bg: C.goldDeep, size: 23, font: LATIN });
+	pill(ctx, `Kural ${d.number}`, W / 2, 320, { bg: C.goldDeep, size: 23, font: LATIN });
 
 	// transliteration — compact caption
 	const trBlock = fitBlock2(ctx, d.transliteration, 900, 120, 30, 22, { weight: 400, family: LATIN }, 1.55);
@@ -377,12 +366,12 @@ export async function renderEnglish(ctx, d) {
 	};
 }
 
-function footer(ctx, text, y) {
-	ctx.textAlign = 'center';
+function footer(ctx, text, x, y) {
+	ctx.textAlign = 'right';
 	ctx.textBaseline = 'middle';
 	ctx.font = `400 20px ${LATIN}`;
 	ctx.fillStyle = C.inkSoft;
-	ctx.fillText(`✦  ${text}`, W / 2, y);
+	ctx.fillText(`✦  ${text}`, x, y);
 }
 
 export function buildCaption(d) {
